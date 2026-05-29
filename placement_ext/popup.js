@@ -106,19 +106,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 container.appendChild(card);
             });
 
+            // --- 1. OPEN FORM BUTTON (With Double-Click Protection) ---
             document.querySelectorAll('.open-form-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
-                    const url = e.currentTarget.getAttribute('data-url');
-                    const driveId = parseInt(e.currentTarget.getAttribute('data-id')); // Safely grab ID directly
+                    const button = e.currentTarget;
                     
-                    e.currentTarget.innerHTML = "Opening..."; // UI feedback
+                    // Prevent double-clicks from spamming the "Opened" metrics
+                    if (button.disabled) return; 
+                    button.disabled = true; 
+                    
+                    const url = button.getAttribute('data-url');
+                    const driveId = parseInt(button.getAttribute('data-id'));
+                    
+                    button.innerHTML = "Opening..."; 
                     
                     const stor = await chrome.storage.local.get(['clicked_drives']);
                     const clickedDrives = stor.clicked_drives || [];
                     
                     if (!clickedDrives.includes(driveId)) {
                         try {
-                            // WE ADDED 'AWAIT' HERE so the browser doesn't kill the ping!
                             await fetch(`${API_BASE_URL}/drives/${driveId}/click`, { 
                                 method: 'POST', 
                                 headers: { 'Authorization': `Bearer ${currentJwt}` }
@@ -128,21 +134,56 @@ document.addEventListener('DOMContentLoaded', async () => {
                         } catch(err) {}
                     }
                     
-                    // Native extension way to open tabs safely
                     chrome.tabs.create({ url: url }); 
+                    
+                    // Re-enable button in case they switch back to the popup
+                    setTimeout(() => { 
+                        button.innerHTML = "Open Form →"; 
+                        button.disabled = false; 
+                    }, 1000);
                 });
             });
 
+            // --- 2. MARK AS APPLIED BUTTON (With UX Feedback & Debounce) ---
             document.querySelectorAll('.dismiss-btn').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
-                    const driveId = parseInt(e.currentTarget.getAttribute('data-id'));
-                    fetch(`${API_BASE_URL}/drives/${driveId}/apply`, { method: 'POST', headers: { 'Authorization': `Bearer ${currentJwt}` }});
+                    const button = e.currentTarget;
+                    
+                    // Instantly lock the button to prevent duplicate "Applied" increments
+                    if (button.disabled) return; 
+                    button.disabled = true; 
+                    
+                    const driveId = parseInt(button.getAttribute('data-id'));
+                    button.innerHTML = "⏳"; // Show loading state
+                    
                     const stor = await chrome.storage.local.get(['dismissed_drives']);
                     const updatedDismissed = stor.dismissed_drives || [];
-                    updatedDismissed.push(driveId);
-                    await chrome.storage.local.set({ 'dismissed_drives': updatedDismissed });
-                    e.currentTarget.closest('.alert-card').style.display = 'none';
-                    showToast("Drive archived to history.");
+                    
+                    // Only ping the server if it's the very first time clicking
+                    if (!updatedDismissed.includes(driveId)) {
+                        try {
+                            await fetch(`${API_BASE_URL}/drives/${driveId}/apply`, { 
+                                method: 'POST', 
+                                headers: { 'Authorization': `Bearer ${currentJwt}` }
+                            });
+                            updatedDismissed.push(driveId);
+                            await chrome.storage.local.set({ 'dismissed_drives': updatedDismissed });
+                        } catch(error) {}
+                    }
+                    
+                    // UI Confirmation: Turn button green and show a checkmark
+                    button.style.backgroundColor = "var(--accent-green)";
+                    button.style.color = "white";
+                    button.style.border = "none";
+                    button.innerHTML = "✅";
+                    
+                    // Trigger the explicit toast message
+                    showToast("Marked as Applied!");
+                    
+                    // Smoothly remove the card after a 600ms delay so the user actually sees the success
+                    setTimeout(() => {
+                        button.closest('.alert-card').style.display = 'none';
+                    }, 600);
                 });
             });
         } catch (error) {}
