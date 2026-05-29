@@ -117,16 +117,19 @@ class PlacementDriveBase(SQLModel):
     deadline_text: str
     apply_link: str
     is_active: bool = Field(default=True)
-    # ADD THESE TWO LINES:
     clicks_count: int = Field(default=0)
     applied_count: int = Field(default=0)
+    
+    # --- NEW ELIGIBILITY FIELDS ---
+    min_cgpa: float = Field(default=0.0)
+    max_backlogs: int = Field(default=10)
+    allowed_branch: str = Field(default="ALL")
 
 class PlacementDrive(PlacementDriveBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
 class PlacementDriveCreate(PlacementDriveBase):
     pass
-
 # ==========================================
 # 4. FASTAPI APP INIT & CORS SECURITY
 # ==========================================
@@ -299,13 +302,30 @@ def create_drive(drive: PlacementDriveCreate, session: Session = Depends(get_ses
     session.refresh(db_drive)
     return db_drive
 
-# STUDENTS: Fetch all currently active drives
+# STUDENTS: Fetch only ELIGIBLE active drives
 @app.get("/drives/active")
 def get_active_drives(session: Session = Depends(get_session), email: str = Depends(verify_token)):
-    active_drives = session.exec(
-        select(PlacementDrive).where(PlacementDrive.is_active == True)
-    ).all()
-    return active_drives
+    # 1. Fetch the student's profile securely
+    profile = session.exec(select(AcademicProfile).where(AcademicProfile.personal_email == email)).first()
+    
+    # If they haven't set up a profile yet, return an empty list so they go to the dashboard
+    if not profile:
+        return []
+
+    # 2. Fetch all active drives
+    active_drives = session.exec(select(PlacementDrive).where(PlacementDrive.is_active == True)).all()
+    
+    # 3. The Smart Filter Engine
+    eligible_drives = []
+    for drive in active_drives:
+        # Check Branch (Allows "ALL" or exact match, ignoring upper/lowercase)
+        branch_match = (drive.allowed_branch.upper() == "ALL" or profile.branch.upper() == drive.allowed_branch.upper())
+        
+        # Check Academic Criteria
+        if profile.btech_cgpa >= drive.min_cgpa and profile.active_backlogs <= drive.max_backlogs and branch_match:
+            eligible_drives.append(drive)
+            
+    return eligible_drives
 
 # ADMIN: View all drives (Active and Inactive)
 @app.get("/admin/drives/")
