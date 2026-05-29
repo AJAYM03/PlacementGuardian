@@ -1,0 +1,11 @@
+# Ignore Environment Variables (Backend)
+.env
+
+# Ignore Database (Backend)
+placement.db
+
+# Ignore Python Cache (Backend)
+__pycache__/
+*.pyc
+.venv/
+venv/

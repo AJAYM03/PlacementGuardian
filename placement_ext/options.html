@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Guardian Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div id="auth-warning" class="hidden">
+        <h2>🔒 Authentication Required</h2>
+        <p>Please click the extension icon in your toolbar and log in with Google first.</p>
+    </div>
+
+    <div class="container fade-in" id="dashboard-content">
+        <header class="header">
+            <div>
+                <h1 class="title">Placement Guardian</h1>
+                <p class="subtitle">Manage your placement profile and resume vault.</p>
+            </div>
+            <button id="btn-logout" class="btn btn-ghost">Sign Out</button>
+        </header>
+
+        <section class="section">
+            <div class="section-header">
+                <h2>Academic Profile</h2>
+                <button id="btn-save-profile" class="btn btn-primary">Save Changes</button>
+            </div>
+            
+            <form id="profile-form" class="form-grid">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <input type="text" id="full_name" required>
+                </div>
+                <div class="input-group">
+                    <label>College UID</label>
+                    <input type="text" id="college_uid" required>
+                </div>
+                <div class="input-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="phone_number" placeholder="10 digits" required>
+                </div>
+                <div class="input-group">
+                    <label>Branch</label>
+                    <input type="text" id="branch" required>
+                </div>
+                <div class="input-group">
+                    <label>B.Tech CGPA</label>
+                    <input type="number" step="0.01" id="btech_cgpa" required>
+                </div>
+                <div class="input-group">
+                    <label>Active Backlogs</label>
+                    <input type="number" id="active_backlogs" required>
+                </div>
+                <div class="input-group">
+                    <label>12th Percentage</label>
+                    <input type="number" step="0.1" id="twelfth_percentage" required>
+                </div>
+                <div class="input-group">
+                    <label>10th Percentage</label>
+                    <input type="number" step="0.1" id="tenth_percentage" required>
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <hr style="border-color: var(--border-color); margin: 10px 0;">
+                </div>
+                <div class="input-group">
+                    <label>LinkedIn URL (Optional)</label>
+                    <input type="url" id="linkedin_url" placeholder="https://linkedin.com/in/...">
+                </div>
+                <div class="input-group">
+                    <label>GitHub URL (Optional)</label>
+                    <input type="url" id="github_url" placeholder="https://github.com/...">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <label>Portfolio URL (Optional)</label>
+                    <input type="url" id="portfolio_url" placeholder="https://yourwebsite.com">
+                </div>
+            </form>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <h2>Resume Vault</h2>
+                <p class="subtitle">Your default resume is automatically copied when filling forms.</p>
+            </div>
+            
+            <div id="resume-list" class="resume-list">
+                <p class="text-muted">Loading resumes...</p>
+            </div>
+
+            <form id="resume-form" class="add-resume-box">
+                <input type="text" id="new_resume_name" placeholder="e.g., Cybersecurity Focus" required>
+                <input type="url" id="new_resume_link" placeholder="Google Drive Link (https://...)" required>
+                <button type="submit" class="btn btn-secondary">Add Resume</button>
+            </form>
+        </section>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>

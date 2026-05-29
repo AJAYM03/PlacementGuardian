@@ -1,0 +1,122 @@
+:root {
+    --bg-base: #0e0e11;
+    --bg-surface: #18181b;
+    --bg-surface-hover: #27272a;
+    --text-primary: #ededed;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-focus: rgba(16, 185, 129, 0.4);
+    --accent-green: #10b981;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    padding: 40px 20px;
+}
+
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.hidden { display: none !important; }
+
+/* Typography & Layout */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+}
+.title { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+.subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+.section-header h2 { font-size: 18px; font-weight: 500; }
+
+/* Forms & Inputs */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+input {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+input:focus {
+    outline: none;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px var(--border-focus);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Resume Box */
+.resume-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.resume-item {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.add-resume-box {
+    display: grid;
+    grid-template-columns: 2fr 3fr auto;
+    gap: 12px;
+    background-color: var(--bg-surface);
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+}
+.btn-primary { background-color: var(--text-primary); color: var(--bg-base); }
+.btn-primary:hover { background-color: #ffffff; box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1); }
+.btn-secondary { background-color: transparent; color: var(--text-primary); border: 1px solid var(--border-color); }
+.btn-secondary:hover { background-color: var(--bg-surface-hover); }
+.btn-ghost { background-color: transparent; color: #fca5a5; padding: 8px 12px; }
+.btn-ghost:hover { background-color: rgba(252, 165, 165, 0.1); }

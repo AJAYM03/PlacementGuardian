@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Officer Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0e0e11;
+            --bg-surface: #18181b;
+            --bg-surface-hover: #27272a;
+            --text-primary: #ededed;
+            --text-secondary: #a1a1aa;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-focus: rgba(16, 185, 129, 0.4);
+            --accent-green: #10b981;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-base); color: var(--text-primary); padding: 40px 20px; line-height: 1.5; }
+        .container { max-width: 540px; margin: 0 auto 32px auto; background-color: var(--bg-surface); padding: 32px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+        
+        h1 { font-size: 20px; font-weight: 600; margin-bottom: 6px; letter-spacing: -0.01em; }
+        p.subtitle { color: var(--text-secondary); margin-bottom: 24px; font-size: 13px; }
+
+        .input-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+        label { font-weight: 500; font-size: 13px; color: var(--text-secondary); }
+        input { width: 100%; padding: 10px 12px; background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; color-scheme: dark; }
+        input:focus { outline: none; border-color: var(--accent-green); box-shadow: 0 0 0 3px var(--border-focus); background-color: rgba(255, 255, 255, 0.06); }
+
+        /* Enhanced Primary Button */
+        button.primary-btn { background-color: var(--accent-green); color: #ffffff; border: none; padding: 12px; width: 100%; border-radius: var(--radius-md); font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
+        button.primary-btn:hover { background-color: #059669; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transform: translateY(-1px); }
+
+        /* Admin Toast */
+        .admin-toast {
+            position: fixed; top: 20px; right: -300px;
+            background: var(--bg-surface-hover); color: var(--text-primary);
+            padding: 16px 20px; border-radius: var(--radius-md); font-size: 14px;
+            font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000; border-left: 4px solid var(--accent-green);
+        }
+        .admin-toast.show { right: 20px; }
+        .admin-toast.error { border-left-color: #fca5a5; }
+
+        /* Tabs UI */
+        .tabs { display: flex; gap: 16px; }
+        .tab { background: none; border: none; color: var(--text-secondary); padding: 8px 0; cursor: pointer; font-size: 14px; font-weight: 500; position: relative; transition: color 0.2s; }
+        .tab:hover { color: var(--text-primary); }
+        .tab.active { color: var(--text-primary); }
+        .tab.active::after { content: ''; position: absolute; bottom: -8px; left: 0; right: 0; height: 2px; background-color: var(--accent-green); }
+
+        /* Drive Items */
+        .drive-item { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; }
+        .drive-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .metrics { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; display: inline-flex; }
+        .action-row { display: flex; gap: 8px; justify-content: flex-end; }
+        
+        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; cursor: pointer; border: none; font-weight: 500; transition: all 0.15s; }
+        .btn-sm:hover { opacity: 0.8; }
+        .btn-deactivate { background: rgba(252, 165, 165, 0.1); color: #fca5a5; }
+        .btn-reactivate { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+        .btn-delete { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+        .btn-delete:hover { border-color: #fca5a5; color: #fca5a5; }
+    </style>
+</head>
+<body>
+    <div id="admin-toast" class="admin-toast">Notification</div>
+
+    <div class="container">
+        <h1>Broadcast New Drive</h1>
+        <p class="subtitle">Instantly alert all students on the network.</p>
+        
+        <form id="admin-form">
+            <div class="input-group">
+                <label>Company Name</label>
+                <input type="text" id="company_name" required>
+            </div>
+            <div class="input-group">
+                <label>Role Summary</label>
+                <input type="text" id="role_summary" required>
+            </div>
+            <div class="input-group">
+                <label>Exact Deadline</label>
+                <input type="datetime-local" id="deadline_picker" required>
+            </div>
+            <div class="input-group">
+                <label>Google Form Link</label>
+                <input type="url" id="apply_link" required>
+            </div>
+            <button type="submit" id="submit-btn" class="primary-btn" style="margin-top: 8px;">Broadcast to Students</button>
+        </form>
+    </div>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; padding-bottom: 8px;">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('active')">Live Broadcasts</button>
+                <button class="tab" onclick="switchTab('history')">History & Archive</button>
+            </div>
+            <button id="export-btn" class="btn-sm" onclick="downloadReport()" style="display: none; background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);">
+                📥 Export Archive CSV
+            </button>
+        </div>
+        
+        <div id="drive-list">
+            <p style="color: var(--text-muted); font-size: 13px;">Loading drives...</p>
+        </div>
+    </div>
+
+    <script>
+        let allDrives = [];
+        let currentTab = 'active';
+
+        function showAdminToast(message, isError = false) {
+            const toast = document.getElementById('admin-toast');
+            toast.textContent = message;
+            if (isError) toast.classList.add('error');
+            else toast.classList.remove('error');
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Toggle Tab styling
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Toggle Export Button Visibility
+            const exportBtn = document.getElementById('export-btn');
+            if (tabName === 'history') {
+                exportBtn.style.display = 'block';
+            } else {
+                exportBtn.style.display = 'none';
+            }
+
+            renderList();
+        }
+
+        async function loadAdminDrives() {
+            try {
+                const response = await fetch('/admin/drives/');
+                if (!response.ok) return;
+                allDrives = await response.json();
+                renderList();
+            } catch (error) {
+                showAdminToast("Failed to load network data. Check server.", true);
+            }
+        }
+
+        function renderList() {
+            const list = document.getElementById('drive-list');
+            list.innerHTML = '';
+            
+            const filteredDrives = allDrives.filter(d => currentTab === 'active' ? d.is_active : !d.is_active);
+
+            if (filteredDrives.length === 0) {
+                list.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">No ${currentTab} drives found.</p>`;
+                return;
+            }
+
+            filteredDrives.forEach(drive => {
+                const item = document.createElement('div');
+                item.className = 'drive-item';
+                
+                let controlsHtml = '';
+                if (drive.is_active) {
+                    controlsHtml = `<button class="btn-sm btn-deactivate" onclick="toggleDrive(${drive.id})">Deactivate & Archive</button>`;
+                } else {
+                    controlsHtml = `
+                        <button class="btn-sm btn-reactivate" onclick="toggleDrive(${drive.id})">Reactivate</button>
+                        <button class="btn-sm btn-delete" onclick="deleteDrive(${drive.id})">Delete</button>
+                    `;
+                }
+                
+                item.innerHTML = `
+                    <div class="drive-header">
+                        <div>
+                            <div style="font-weight: 500; font-size: 15px;">${drive.company_name}</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">${drive.deadline_text}</div>
+                        </div>
+                        <div class="metrics">
+                            <span>👁️ ${drive.clicks_count} Opened</span>
+                            <span>✅ ${drive.applied_count} Applied</span>
+                        </div>
+                    </div>
+                    <div class="action-row">${controlsHtml}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        async function toggleDrive(id) {
+            await fetch(`/admin/drives/${id}/toggle`, { method: 'PUT' });
+            showAdminToast("Drive status updated.");
+            loadAdminDrives(); 
+        }
+
+        async function deleteDrive(id) {
+            if(confirm("Are you sure? This will permanently delete this drive and all its metrics.")) {
+                await fetch(`/admin/drives/${id}`, { method: 'DELETE' });
+                showAdminToast("Drive permanently deleted.");
+                loadAdminDrives();
+            }
+        }
+
+        document.getElementById('admin-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            
+            const chosenDate = new Date(document.getElementById('deadline_picker').value);
+            if (chosenDate < new Date()) {
+                showAdminToast("Cannot broadcast: Deadline is in the past.", true);
+                return; 
+            }
+
+            btn.textContent = "Broadcasting...";
+            const niceDateString = "Ends " + chosenDate.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            const payload = {
+                company_name: document.getElementById('company_name').value,
+                role_summary: document.getElementById('role_summary').value,
+                deadline_text: niceDateString, 
+                apply_link: document.getElementById('apply_link').value,
+                is_active: true
+            };
+
+            try {
+                const response = await fetch('/drives/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (response.ok) {
+                    document.getElementById('admin-form').reset();
+                    showAdminToast("Success! Drive broadcasted to all students.");
+                    
+                    // Switch back to active tab using a synthetic event to trigger the logic properly
+                    document.querySelector('.tab:first-child').click(); 
+                    
+                    loadAdminDrives(); 
+                } else {
+                    const err = await response.text();
+                    showAdminToast(`Backend Error: ${err}`, true);
+                }
+            } catch (error) { 
+                showAdminToast("Network error. Server might be down.", true); 
+            } finally { 
+                btn.textContent = "Broadcast to Students"; 
+            }
+        });
+
+        // Generates CSV for ONLY archived drives
+        function downloadReport() {
+            const archivedDrives = allDrives.filter(d => !d.is_active);
+            
+            if (archivedDrives.length === 0) {
+                showAdminToast("No archived drives to export.", true);
+                return;
+            }
+
+            let csv = "Company,Deadline,Opened,Applied\n";
+            archivedDrives.forEach(d => {
+                csv += `"${d.company_name}","${d.deadline_text}",${d.clicks_count},${d.applied_count}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'placement_historical_metrics.csv';
+            a.click();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminDrives(); // Load immediately on start
+            
+            // The "Real-Time" Engine: Silently fetch new data every 10 seconds
+            setInterval(loadAdminDrives, 10000); 
+        });
+    </script>
+</body>
+</html>
